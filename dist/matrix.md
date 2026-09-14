@@ -1,7 +1,7 @@
 # 多模态大模型忠实性：方法分类与文献矩阵（2023—2026）
 
 **版本日期：** 2026 年 9 月 14 日  
-**核心条目：** 141 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
+**核心条目：** 147 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
 **年份范围：** 2023—2026。2026 条目只有在正式 proceedings 页面可核验时才标注目标会议。
 
 ## 官方会议/期刊补充（2025—2026）
@@ -24,6 +24,11 @@
 | M144 | 2026 | AIR | [Mitigating Object Hallucinations in LVLMs via Attention Imbalance Rectification](https://openaccess.thecvf.com/content/CVPR2026F/html/Sun_Mitigating_Object_Hallucinations_in_LVLMs_via_Attention_Imbalance_Rectification_CVPRF_2026_paper.html) | 缓解方法 |
 | M145 | 2026 | ALEAHallu | [Look Closer! An Adversarial Parametric Editing Framework for Hallucination Mitigation in VLMs](https://ojs.aaai.org/index.php/AAAI/article/download/39336/43297) | 缓解方法 |
 | M146 | 2026 | Owl | [Causally-Grounded Dual-Path Attention Intervention for Object Hallucination Mitigation in LVLMs](https://ojs.aaai.org/index.php/AAAI/article/download/40918/44879) | 缓解方法 |
+| M147 | 2026 | SAVER | [SAVER: Mitigating Hallucinations in Large Vision-Language Models via Style-Aware Visual Early Revision](https://ojs.aaai.org/index.php/AAAI/article/view/40873) | 缓解方法 |
+| M148 | 2025 | Fine-Grained AI Feedback | [Detecting and Mitigating Hallucination in Large Vision Language Models via Fine-Grained AI Feedback](https://ojs.aaai.org/index.php/AAAI/article/view/34744) | 评价与检测；缓解方法 |
+| M149 | 2026 | RFI | [RFI: Rectified Flow Intervention for Mitigating Object Hallucination in Large Vision-Language Models](https://ojs.aaai.org/index.php/AAAI/article/view/37320) | 缓解方法 |
+| M150 | 2026 | Taming the Phantom | [Taming the Phantom: Token-Asymmetric Filtering for Hallucination Mitigation in Large Vision-Language Models](https://ojs.aaai.org/index.php/AAAI/article/view/37768) | 缓解方法 |
+| M151 | 2026 | EchoBat | [EchoBat: Echo-Vision Enhancement and Echo-Layered Sampling for Video LLMs Hallucination Mitigation](https://ojs.aaai.org/index.php/AAAI/article/view/40875) | 缓解方法 |
 
 本矩阵是综述论文的可追溯证据附表。条目首先由领域综述及其维护的公开文献库形成召回集，再以 arXiv API 核验标题、作者和时间元数据。它是结构化叙述综述的核心样本，不等同于数据库穷尽式系统综述。
 
