@@ -18,7 +18,7 @@
     "officialUrl": "https://aclanthology.org/2025.findings-acl.614/"
   },
   "A-TPT: Angular Diversity Calibration Properties for Test-Time Prompt Tuning of Vision-Language Models": {
-    "zhTitle": "A-TPT：视觉语言模型测试时即时快速提款的角形多样性校准属性",
+    "zhTitle": "A-TPT：视觉语言模型测试时提示调优的角度多样性校准属性",
     "zhAbstract": "",
     "source": "official-abstract-machine-translation",
     "officialUrl": "https://proceedings.iclr.cc/paper_files/paper/2026/hash/7129cf299acbd52a0c462880e7b9e8b8-Abstract-Conference.html"
@@ -2377,7 +2377,7 @@
   },
   "O-TPT: Orthogonality Constraints for Calibrating Test-time Prompt Tuning in Vision-Language Models": {
     "zhTitle": "O-TPT：视觉语言模型中校准测试时间快速提款的条形限制",
-    "zhAbstract": "视觉语言模型(VLMs)的测试即时快速调试正在引起人们的注意,因为它们有能力不作微调而用未贴标签的数据学习。 为此,我们建议采取名为O-TPT的新方法,对与校准VLMS测试-即时快速调试的可学习提示相对应的文字特征引入正形限制。 我们对各数据集进行了广泛的实验,这些数据集的骨干和基线各不相同。",
+    "zhAbstract": "视觉语言模型(VLMs)的测试时提示调优正在引起人们的注意,因为它们有能力不作微调而用未贴标签的数据学习。 为此,我们建议采取名为O-TPT的新方法,对与校准VLMS测试时提示调优的可学习提示相对应的文字特征引入正交约束。 我们对各数据集进行了广泛的实验,这些数据集的骨干和基线各不相同。",
     "source": "official-abstract-machine-translation",
     "officialUrl": "https://openaccess.thecvf.com/content/CVPR2025/html/Sharifdeen_O-TPT_Orthogonality_Constraints_for_Calibrating_Test-time_Prompt_Tuning_in_Vision-Language_CVPR_2025_paper.html"
   },
