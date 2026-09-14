@@ -1,10 +1,10 @@
 # 多模态大模型忠实性：方法分类与文献矩阵（2023—2026）
 
 **版本日期：** 2026 年 9 月 14 日  
-**网站当前条目：** 622 篇去重论文；其中 539 篇已链接到指定会议/期刊的官方 proceedings 或出版页面，83 篇保留为 Preprint / venue to verify。核心幻觉论文与相邻忠实性研究在网页中分别标记。
+**网站当前条目：** 753 篇去重论文；其中 680 篇已链接到指定会议/期刊的官方 proceedings 或出版页面，73 篇保留为 Preprint / venue to verify。网页按“幻觉缓解、幻觉检测与评测、推理、忠实性”四个可交叉主题标签组织。
 **年份范围：** 2023—2026。2026 条目只有在正式 proceedings 页面可核验时才标注目标会议。
 
-**本轮全量目录扫描：** 2026 年 9 月 14 日按会议与年份重新扫描 ACL、ICML、ICLR、NeurIPS、CVPR、ICCV、ECCV、EMNLP 与 NAACL 的官方目录，并补充 AAAI 官方 OJS、IJCV 出版页面和 WWW 官方/DOI 记录。针对本轮重点复核的 CVPR、ICLR 与 NeurIPS，完整解析 10 个官方年度目录，并对 2,031 个视觉/多模态候选的官方详情页逐篇抓取摘要后分类；最终网页中收录 CVPR 136 篇、ICLR 78 篇、NeurIPS 68 篇。ICML 2023—2025 使用 PMLR 正式卷，2026 使用 ICML 官方日程；ACL 系列使用 ACL Anthology 的主会与 Findings 页面。“核心幻觉”仅保留题名明确研究视觉/多模态幻觉的论文；官方摘要明确讨论幻觉或与视觉证据、感知/推理忠实性、不确定性直接相关的论文标为“相关研究”。NeurIPS 2026 尚无可核验的正式 proceedings，因此不提前将预印本标为 NeurIPS 2026。
+**本轮全量目录扫描：** 2026 年 9 月 14 日按会议与年份重新扫描 ACL、ICML、ICLR、NeurIPS、CVPR、ICCV、ECCV、EMNLP 与 NAACL 的官方目录，并补充 AAAI 官方 OJS、IJCV 出版页面和 WWW 官方/DOI 记录。针对 CVPR、ICLR 与 NeurIPS，解析官方年度目录并对 2,031 个视觉/多模态候选的详情页抓取摘要；ICML 2023—2025 使用 PMLR 正式卷，2026 使用 ICML 官方日程；ACL 系列使用 ACL Anthology 的主会与 Findings 页面。分类允许一篇论文同时属于多个主题，但“推理”标签本身不等于论文已经验证了推理忠实性。NeurIPS 2026 尚无可核验的正式 proceedings，因此不提前将预印本标为 NeurIPS 2026。
 
 ## 官方会议/期刊补充（2025—2026）
 

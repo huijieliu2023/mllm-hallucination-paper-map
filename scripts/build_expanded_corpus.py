@@ -3,9 +3,9 @@
 
 Input pages are downloaded from the official proceedings sites to /private/tmp.
 The scanner uses title plus official abstract text when the directory exposes
-abstracts (ACL Anthology), and a strict title-based rule otherwise.  Direct
-hallucination work and adjacent faithfulness/reliability work stay visibly
-separated in the generated corpus.
+abstracts (ACL Anthology), and a strict title-based rule otherwise. Records can
+carry multiple research-topic tags; generic reasoning is not treated as proof
+of reasoning faithfulness.
 """
 
 from __future__ import annotations
@@ -21,6 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "dist/index.html"
 OUT = ROOT / "dist/expanded-corpus.js"
+TRANSLATION_CACHE = ROOT / "data/zh-summaries.json"
+TRANSLATIONS = json.loads(TRANSLATION_CACHE.read_text()) if TRANSLATION_CACHE.exists() else {}
 
 
 def norm(value: str) -> str:
@@ -48,7 +50,8 @@ VISUAL_TERMS = (
 VISUAL_TITLE_TERMS = (
     "vision-language", "vision language", "visual language", "multimodal",
     "multi-modal", "mllm", "lvlm", "vlm", "videollm", "video llm",
-    "video large language", "video language model", "audio-visual", "audio visual", "visual hallucination",
+    "video large language", "video language model", "vision-llm", "vision llm",
+    "audio-visual", "audio visual", "visual hallucination",
     "image caption", "captioning", "object hallucination", "relationship hallucination",
     "relation hallucination", "spatial hallucination", "motion hallucination",
     "scene hallucination", "document vqa", "ocr",
@@ -68,7 +71,8 @@ MODEL_TERMS = (
     "vision-language model", "vision language model", "visual language model",
     "large vision-language", "large vision language", "multimodal large language",
     "multi-modal large language", "large multimodal model", "large multi-modal model",
-    "mllm", "lvlm", "video llm", "videollm", "video language model", "audio-visual large language",
+    "mllm", "lvlm", "multimodal llm", "multi-modal llm", "vision-llm",
+    "vision llm", "video llm", "videollm", "video language model", "audio-visual large language",
     "vision) language model", "image-text generation", "interleaved image",
     "document vqa",
 )
@@ -85,6 +89,17 @@ RELATED_CUES = (
     "visual information gain", "visual information steering",
     "representational failures in vision", "visual counting bottleneck",
     "perceptual bandwidth bottleneck", "visual persuasion",
+)
+
+REASONING_TITLE_CUES = (
+    "reasoning", "reasoner", "chain-of-thought", "chain of thought", "multimodal cot",
+    "visual cot", "rationale", "planning and acting", "thinking with images",
+)
+
+FAITHFULNESS_TITLE_CUES = (
+    "faithful", "faithfulness", "factual", "factuality", "visual evidence",
+    "evidence-grounded", "trustworthy", "uncertainty", "confidence",
+    "calibrat", "consistency", "self-verification",
 )
 
 
@@ -105,6 +120,37 @@ def title_is_visual(title: str) -> bool:
     return bool(visual_in_title or acronym_in_title or re.search(r"\bgui\b", title_low))
 
 
+def title_is_language_model(title: str) -> bool:
+    """Require an explicit language-model signal for reasoning/faithfulness expansion."""
+    low = title.lower()
+    if "multilingual" in low and not any(term in low for term in (
+        "vision", "visual", "image", "video", "multimodal", "multi-modal",
+    )):
+        return False
+    acronym = bool(re.search(r"\b(?:mllms?|lvlms?|vlms?)\b", low))
+    visual_llm = bool(
+        re.search(r"\bllms?\b", low)
+        and any(term in low for term in (
+            "vision", "visual", "image", "video", "audio-visual", "audio visual",
+            "multimodal", "multi-modal", "cross-modal", "cross modal",
+        ))
+    )
+    return bool(
+        acronym or visual_llm
+        or "vision-language model" in low
+        or "vision language model" in low
+        or "visual language model" in low
+        or "multimodal large language" in low
+        or "multi-modal large language" in low
+        or "large multimodal model" in low
+        or "large multi-modal model" in low
+        or "video language model" in low
+        or "video llm" in low
+        or "videollm" in low
+        or bool(re.search(r"\bgui\b", low))
+    )
+
+
 def is_abstract_core(title: str, abstract: str = "") -> bool:
     """Hallucination is a repeated subject in an official LVLM/VLM abstract."""
     abstract_low = abstract.lower()
@@ -123,11 +169,7 @@ def is_abstract_related(title: str, abstract: str = "") -> bool:
         abstract_low.count("hallucin") >= 2
         and any(term in abstract_low for term in MODEL_TERMS)
         and any(term in abstract_low for term in ABSTRACT_VISUAL_CUES)
-        and any(term in title_low for term in (
-            "vision", "visual", "image", "multimodal", "multi-modal", "mllm",
-            "lvlm", "vlm", "video", "caption", "ground", "factual", "evidence",
-            "alignment", "calibration", "attention",
-        ))
+        and title_is_visual(title)
     )
 
 
@@ -136,7 +178,7 @@ def scope_for_detail_page(title: str, abstract: str = "") -> str | None:
     if is_direct(title, abstract):
         return "Core"
     abstract_low = abstract.lower()
-    if is_related(title) or is_abstract_core(title, abstract) or (
+    if is_related(title) or is_explicit_reasoning_or_faithfulness(title) or is_abstract_core(title, abstract) or (
         "hallucin" in abstract_low
         and title_is_visual(title)
         and any(term in abstract_low for term in MODEL_TERMS)
@@ -153,10 +195,24 @@ def is_related(title: str) -> bool:
     )
 
 
+def is_explicit_reasoning_or_faithfulness(title: str) -> bool:
+    """Recover explicitly named MLLM/LVLM reasoning and faithfulness work."""
+    low = title.lower()
+    model_context = title_is_language_model(title)
+    faithful = any(cue in low for cue in FAITHFULNESS_TITLE_CUES)
+    reasoning = any(cue in low for cue in REASONING_TITLE_CUES)
+    diagnostic_boundary = any(cue in low for cue in (
+        "hallucin", "faith", "factual", "ground", "evidence", "verif",
+        "uncertainty", "confidence", "calibrat", "benchmark", "diagnos",
+        "evaluat", "failure", "limitations", "bottleneck", "bias",
+    ))
+    return model_context and (faithful or (reasoning and diagnostic_boundary))
+
+
 def scope_for(title: str, abstract: str = "") -> str | None:
     if is_direct(title, abstract):
         return "Core"
-    if is_related(title) or is_abstract_related(title, abstract):
+    if is_related(title) or is_explicit_reasoning_or_faithfulness(title) or is_abstract_related(title, abstract):
         return "Related"
     return None
 
@@ -452,21 +508,35 @@ EXCLUDE = (
 )
 
 
-def role_for(title: str) -> str:
-    low = title.lower()
-    evaluation = any(x in low for x in (
-        "evaluat", "benchmark", "detect", "assess", "discover", "understanding",
-        "why ", "study", "analysis", "uncertainty", "revealing", "exposing",
-        "localization", "know what they know", "fails to",
-    ))
-    mitigation = any(x in low for x in (
-        "mitigat", "reduc", "alleviat", "combat", "suppress", "steering",
-        "decoding", "intervention", "optimization", "editing", "training",
-        "grounding", "reinforcement", "self-reflection", "reallocation",
-    ))
-    if evaluation and mitigation:
-        return "评价与检测；缓解方法"
-    return "缓解方法" if mitigation else "评价与检测"
+def categories_for(title: str, abstract: str = "") -> list[str]:
+    """Assign non-exclusive topical categories using explicit paper language."""
+    title_low = title.lower()
+    text = f"{title} {abstract}".lower() if "hallucin" in title_low else title_low
+    categories: list[str] = []
+    hallucination_context = "hallucin" in text
+
+    if hallucination_context and any(x in text for x in (
+        "mitigat", "reduc", "alleviat", "combat", "suppress", "correct",
+        "steering", "decoding", "intervention", "optimization", "editing",
+        "training", "preference", "self-reflection", "reallocation", "rectif",
+    )):
+        categories.append("幻觉缓解")
+    if hallucination_context and any(x in text for x in (
+        "evaluat", "benchmark", "detect", "assess", "diagnos", "probe",
+        "understanding", "why ", "study", "analysis", "measure", "metric",
+        "localiz", "taxonomy", "dataset", "survey", "unveil", "investigat",
+    )):
+        categories.append("幻觉检测与评测")
+    if any(x in title_low for x in REASONING_TITLE_CUES):
+        categories.append("推理")
+    if any(x in title_low for x in FAITHFULNESS_TITLE_CUES):
+        categories.append("忠实性")
+
+    if hallucination_context and not any(c.startswith("幻觉") for c in categories):
+        categories.append("幻觉检测与评测")
+    if not categories:
+        categories.append("忠实性")
+    return categories
 
 
 def method_for(title: str) -> str:
@@ -518,23 +588,30 @@ def zh_title(title: str) -> str:
     return out
 
 
-def guide_for(title: str, label: str, scope: str) -> str:
-    if scope == "Related":
-        return "该论文研究视觉证据、感知失真、推理忠实性或不确定性，与多模态幻觉的成因和评测直接相邻；本站将其标为“相关研究”，不计作题名明确的核心幻觉论文。"
-    if "评价" in label and "缓解" in label:
-        return "该论文同时分析或评测多模态幻觉，并提出相应的检测或缓解方案；具体实验设置、数据集和数值结论以官方摘要与论文正文为准。"
-    if "缓解" in label:
-        return "该论文提出针对视觉/多模态生成幻觉的缓解方法，重点减少输出中缺乏输入视觉证据支持的内容。"
-    return "该论文聚焦视觉或多模态模型幻觉的定义、评测、检测或机制分析，并通过官方论文所述基准与实验刻画模型输出和视觉证据之间的不一致。"
+def guide_for(title: str, categories: list[str]) -> str:
+    method = method_for(title)
+    if "幻觉缓解" in categories and "幻觉检测与评测" in categories:
+        return f"{method}围绕多模态模型的幻觉识别与缓解展开，论文同时报告检测或分析环节以及降低幻觉的处理方法。"
+    if "幻觉缓解" in categories:
+        return f"{method}提出面向视觉或多模态生成的幻觉缓解方法，目标是减少缺乏输入视觉证据支持的输出。"
+    if "幻觉检测与评测" in categories:
+        return f"{method}研究视觉或多模态模型中的幻觉检测、评测或失效分析，用于刻画模型输出与视觉证据之间的不一致。"
+    if "推理" in categories and "忠实性" in categories:
+        return f"{method}研究多模态推理与证据忠实性，关注推理过程、视觉证据使用及最终回答之间的关系。"
+    if "推理" in categories:
+        return f"{method}研究多模态推理能力及其失效模式，重点考察模型如何利用视觉信息完成中间推断或得到答案。"
+    return f"{method}研究多模态模型的忠实性、事实性、视觉接地或不确定性，关注生成内容是否得到输入证据支持。"
 
 
-def add(rows, seen, title, url, venue, year, scope="Core"):
+def add(rows, seen, title, url, venue, year, scope="Core", abstract=""):
     title = " ".join(title.split()).strip(" .")
     if not title or norm(title) in seen:
         return
     if any(term in title.lower() for term in EXCLUDE):
         return
-    label = role_for(title)
+    categories = categories_for(title, abstract)
+    translation = TRANSLATIONS.get(title, {})
+    label = "；".join(categories)
     rows.append({
         "year": year,
         "method": method_for(title),
@@ -543,8 +620,14 @@ def add(rows, seen, title, url, venue, year, scope="Core"):
         "venue": venue,
         "label": label,
         "scope": scope,
-        "zhTitle": zh_title(title),
-        "zhAbstract": guide_for(title, label, scope),
+        "categories": categories,
+        "zhTitle": translation.get("zhTitle") or zh_title(title),
+        "zhAbstract": translation.get("zhAbstract") or guide_for(title, categories),
+        "summarySource": (
+            "official-abstract-curated" if translation.get("source") == "official-abstract-curated-translation"
+            else "official-abstract-mt" if translation.get("zhAbstract") else "topic-summary"
+        ),
+        "_abstract": abstract,
     })
     seen.add(norm(title))
 
@@ -606,6 +689,7 @@ def main() -> None:
                 add(
                     rows, seen, title, record["url"],
                     f"{record['venue']} {record['year']}", int(record["year"]), scope,
+                    record.get("abstract", ""),
                 )
 
     # ICLR and NeurIPS official proceedings indexes.
@@ -668,7 +752,7 @@ def main() -> None:
             scope = scope_for(title, abstract)
             if scope:
                 venue = family + (" Findings" if findings else "") + f" {year}"
-                add(rows, seen, title, f"https://aclanthology.org/{paper_id}/", venue, year, scope)
+                add(rows, seen, title, f"https://aclanthology.org/{paper_id}/", venue, year, scope, abstract)
 
     # Additional AAAI papers verified on the official OJS article pages.
     manual = [
@@ -713,6 +797,13 @@ def main() -> None:
         "https://www2026.thewebconf.org/program/full-schedule.html", "WWW 2026", 2026, "Related")
 
     rows.sort(key=lambda item: (-item["year"], item["venue"], item["title"]))
+    Path("/private/tmp/mllm-translation-source.json").write_text(
+        json.dumps([
+            {"title": row["title"], "abstract": row.pop("_abstract", ""), "url": row["url"],
+             "venue": row["venue"], "categories": row["categories"]}
+            for row in rows
+        ], ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     for index, row in enumerate(rows, 1):
         row["id"] = f"X{index:03d}"
     OUT.write_text("window.EXPANDED_CORPUS = " + json.dumps(rows, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
