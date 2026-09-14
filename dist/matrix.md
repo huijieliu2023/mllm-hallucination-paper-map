@@ -1,7 +1,7 @@
 # 多模态大模型忠实性：方法分类与文献矩阵（2023—2026）
 
 **版本日期：** 2026 年 9 月 14 日  
-**核心条目：** 157 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
+**核心条目：** 158 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
 **年份范围：** 2023—2026。2026 条目只有在正式 proceedings 页面可核验时才标注目标会议。
 
 ## 官方会议/期刊补充（2025—2026）
@@ -39,6 +39,7 @@
 | M159 | 2025 | TL-DPO | [Stop Learning it all to Mitigate Visual Hallucination, Focus on the Hallucination Target](https://openaccess.thecvf.com/content/CVPR2025/papers/Yoon_Stop_Learning_it_all_to_Mitigate_Visual_Hallucination_Focus_on_CVPR_2025_paper.pdf) | 缓解方法 |
 | M160 | 2025 | Visual Information Steering | [The Hidden Life of Tokens: Reducing Hallucination of Large Vision-Language Models Via Visual Information Steering](https://proceedings.mlr.press/v267/li25ca.html) | 缓解方法 |
 | M161 | 2025 | Image-Grounded Guidance | [Mitigating Object Hallucination in Large Vision-Language Models via Image-Grounded Guidance](https://proceedings.mlr.press/v267/zhao25j.html) | 缓解方法 |
+| M162 | 2024 | R-Bench | [Evaluating and Analyzing Relationship Hallucinations in Large Vision-Language Models](https://proceedings.mlr.press/v235/wu24l.html) | 评价与检测 |
 
 本矩阵是综述论文的可追溯证据附表。条目首先由领域综述及其维护的公开文献库形成召回集，再以 arXiv API 核验标题、作者和时间元数据。它是结构化叙述综述的核心样本，不等同于数据库穷尽式系统综述。
 
