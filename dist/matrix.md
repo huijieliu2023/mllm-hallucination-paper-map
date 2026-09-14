@@ -1,8 +1,29 @@
 # 多模态大模型忠实性：方法分类与文献矩阵（2023—2026）
 
-**版本日期：** 2026 年 9 月 3 日  
-**核心条目：** 129 篇去重论文（评价/检测/机制分析 60 篇；缓解 70 篇；1 篇兼具评价与缓解功能）  
-**年份分布：** 2023 年 27 篇，2024 年 59 篇，2025 年 43 篇；2026 年前沿工作另在综述正文补充。
+**版本日期：** 2026 年 9 月 14 日  
+**核心条目：** 141 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
+**年份范围：** 2023—2026。2026 条目只有在正式 proceedings 页面可核验时才标注目标会议。
+
+## 官方会议/期刊补充（2025—2026）
+
+以下条目以正式 proceedings 页面为链接来源，供网站的指定会议筛选使用；该补充集并不把预印本自动标成已发表。
+
+| ID | 年份 | 方法/基准 | 论文 | 功能标签 |
+|---:|---:|---|---|---|
+| M133 | 2025 | Nullu | [Mitigating Object Hallucinations in Large Vision-Language Models via HalluSpace Projection](https://openaccess.thecvf.com/content/CVPR2025/html/Yang_Nullu_Mitigating_Object_Hallucinations_in_Large_Vision-Language_Models_via_HalluSpace_CVPR_2025_paper.html) | 缓解方法 |
+| M134 | 2025 | ICT | [ICT: Image-Object Cross-Level Trusted Intervention for Mitigating Object Hallucination in Large Vision-Language Models](https://openaccess.thecvf.com/content/CVPR2025/html/Chen_ICT_Image-Object_Cross-Level_Trusted_Intervention_for_Mitigating_Object_Hallucination_in_CVPR_2025_paper.html) | 缓解方法 |
+| M135 | 2025 | Attention Lens | [Devils in Middle Layers of Large Vision-Language Models: Interpreting, Detecting and Mitigating Object Hallucinations via Attention Lens](https://openaccess.thecvf.com/content/CVPR2025/html/Jiang_Devils_in_Middle_Layers_of_Large_Vision-Language_Models_Interpreting_Detecting_CVPR_2025_paper.html) | 评价与检测；缓解方法 |
+| M136 | 2025 | INTER | [INTER: Mitigating Hallucination in Large Vision-Language Models by Interaction Guidance Sampling](https://openaccess.thecvf.com/content/ICCV2025/html/Dong_INTER_Mitigating_Hallucination_in_Large_Vision-Language_Models_by_Interaction_Guidance_ICCV_2025_paper.html) | 缓解方法 |
+| M137 | 2025 | EAZY | [Hallucinatory Image Tokens: A Training-free EAZY Approach to Detecting and Mitigating Object Hallucinations in LVLMs](https://openaccess.thecvf.com/content/ICCV2025/html/Che_Hallucinatory_Image_Tokens_A_Training-free_EAZY_Approach_to_Detecting_and_ICCV_2025_paper.html) | 评价与检测；缓解方法 |
+| M138 | 2025 | Context | [Why LVLMs Are More Prone to Hallucinations in Longer Responses: The Role of Context](https://openaccess.thecvf.com/content/ICCV2025/html/Zheng_Why_LVLMs_Are_More_Prone_to_Hallucinations_in_Longer_Responses_ICCV_2025_paper.html) | 评价与检测；缓解方法 |
+| M139 | 2026 | VES-RFT | [VES-RFT: Rewarding Visual Evidence Sensitivity to Mitigate Hallucinations in Large Vision-Language Models](https://openaccess.thecvf.com/content/CVPR2026/html/Hou_VES-RFT_Rewarding_Visual_Evidence_Sensitivity_to_Mitigate_Hallucinations_in_Large_CVPR_2026_paper.html) | 缓解方法 |
+| M140 | 2026 | CausalLens | [CausalLens: Sensitivity-Guided Multi-Head Causal Intervention for Hallucination Mitigation in Large Vision-Language Models](https://openaccess.thecvf.com/content/CVPR2026/html/Ji_CausalLens_Sensitivity-Guided_Multi-Head_Causal_Intervention_for_Hallucination_Mitigation_in_Large_CVPR_2026_paper.html) | 缓解方法 |
+| M141 | 2026 | MCoT | [Understanding and Mitigating Hallucinations in Multimodal Chain-of-Thought Models](https://openaccess.thecvf.com/content/CVPR2026/html/Ma_Understanding_and_Mitigating_Hallucinations_in_Multimodal_Chain-of-Thought_Models_CVPR_2026_paper.html) | 评价与检测；缓解方法 |
+| M142 | 2026 | VEGAS | [VEGAS: Mitigating Hallucinations in Large Vision-Language Models via Vision-Encoder Attention Guided Adaptive Steering](https://openaccess.thecvf.com/content/CVPR2026F/html/Wang_VEGAS_Mitigating_Hallucinations_in_Large_Vision-Language_Models_via_Vision-Encoder_Attention_CVPRF_2026_paper.html) | 缓解方法 |
+| M143 | 2026 | DPA | [Alleviating Hallucinations in Large Vision-Language Models via Decoding-Time Perturbation Adaptation](https://openaccess.thecvf.com/content/CVPR2026F/html/Bai_Alleviating_Hallucinations_in_Large_Vision-Language_Models_via_Decoding-Time_Perturbation_Adaptation_CVPRF_2026_paper.html) | 缓解方法 |
+| M144 | 2026 | AIR | [Mitigating Object Hallucinations in LVLMs via Attention Imbalance Rectification](https://openaccess.thecvf.com/content/CVPR2026F/html/Sun_Mitigating_Object_Hallucinations_in_LVLMs_via_Attention_Imbalance_Rectification_CVPRF_2026_paper.html) | 缓解方法 |
+| M145 | 2026 | ALEAHallu | [Look Closer! An Adversarial Parametric Editing Framework for Hallucination Mitigation in VLMs](https://ojs.aaai.org/index.php/AAAI/article/download/39336/43297) | 缓解方法 |
+| M146 | 2026 | Owl | [Causally-Grounded Dual-Path Attention Intervention for Object Hallucination Mitigation in LVLMs](https://ojs.aaai.org/index.php/AAAI/article/download/40918/44879) | 缓解方法 |
 
 本矩阵是综述论文的可追溯证据附表。条目首先由领域综述及其维护的公开文献库形成召回集，再以 arXiv API 核验标题、作者和时间元数据。它是结构化叙述综述的核心样本，不等同于数据库穷尽式系统综述。
 
