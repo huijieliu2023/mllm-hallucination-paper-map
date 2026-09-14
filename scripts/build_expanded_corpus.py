@@ -2,9 +2,10 @@
 """Build the official-venue expansion used by the static paper map.
 
 Input pages are downloaded from the official proceedings sites to /private/tmp.
-The title filter is deliberately conservative: direct hallucination papers must
-name both hallucination and a visual/multimodal model in the title.  A small,
-audited ICML list is retained as adjacent faithfulness/reliability work.
+The scanner uses title plus official abstract text when the directory exposes
+abstracts (ACL Anthology), and a strict title-based rule otherwise.  Direct
+hallucination work and adjacent faithfulness/reliability work stay visibly
+separated in the generated corpus.
 """
 
 from __future__ import annotations
@@ -32,16 +33,106 @@ def clean(value: str) -> str:
 
 
 VISUAL_TERMS = (
-    "vision-language", "vision language", "multimodal", "multi-modal", "mllm",
-    "lvlm", "videollm", "video llm", "video large language", "audio-visual",
-    "visual hallucination", "image token", "cross-modal", "gui grounding",
-    "mlrm", "3d-llm",
+    "vision-language", "vision language", "visual language", "multimodal",
+    "multi-modal", "mllm", "lvlm", "vlm", "videollm", "video llm",
+    "video large language", "audio-visual", "audio visual", "visual",
+    "image", "cross-modal", "cross modal", "gui", "caption", "ocr",
+    "object hallucination", "relationship hallucination", "relation hallucination",
+    "spatial hallucination", "temporal hallucination", "motion hallucination",
+    "scene hallucination", "3d-llm",
+)
+
+# Strong title-level cues.  These intentionally exclude the bare word "image":
+# in an abstract it is too easy for a text-only hallucination paper to mention
+# an illustrative image or an image-domain comparison in passing.
+VISUAL_TITLE_TERMS = (
+    "vision-language", "vision language", "visual language", "multimodal",
+    "multi-modal", "mllm", "lvlm", "vlm", "videollm", "video llm",
+    "video large language", "audio-visual", "audio visual", "visual hallucination",
+    "image caption", "captioning", "object hallucination", "relationship hallucination",
+    "relation hallucination", "spatial hallucination", "motion hallucination",
+    "scene hallucination", "document vqa", "ocr",
+)
+
+ABSTRACT_VISUAL_CUES = (
+    "vision-language", "vision language", "large vision-language",
+    "large vision language", "multimodal large language",
+    "multi-modal large language", "large multimodal model",
+    "large multi-modal model", "visual input", "visual evidence",
+    "visual grounding", "image input", "image caption", "captioning",
+    "video llm", "video language", "audio-visual", "cross-modal",
+    "cross modal", "document vqa",
+)
+
+MODEL_TERMS = (
+    "vision-language model", "vision language model", "visual language model",
+    "large vision-language", "large vision language", "multimodal large language",
+    "multi-modal large language", "large multimodal model", "large multi-modal model",
+    "mllm", "lvlm", "video llm", "videollm", "audio-visual large language",
+    "vision) language model", "image-text generation", "interleaved image",
+    "document vqa",
+)
+
+RELATED_CUES = (
+    "faithful", "faithfulness", "factual", "factuality", "fact-check",
+    "visual evidence", "visual grounding", "image grounding", "image-grounded",
+    "evidence-grounded", "grounded reasoning", "perceptual faithfulness",
+    "reasoning faithfulness", "perception and reasoning", "perception-reasoning",
+    "misleading visual", "visual uncertainty", "epistemic uncertainty",
+    "calibrating vision-language", "calibration of vision-language",
+    "calibrated vision-language", "trustworthy vision-language",
+    "reasoning limitations of multimodal", "reasoning improve seeing",
+    "visual information gain", "visual information steering",
+    "representational failures in vision", "visual counting bottleneck",
+    "perceptual bandwidth bottleneck", "visual persuasion",
 )
 
 
-def is_direct(title: str) -> bool:
+def is_direct(title: str, abstract: str = "") -> bool:
+    title_low = title.lower()
+    abstract_low = abstract.lower()
+    combined = f"{title_low} {abstract_low}"
+    if "hallucin" in title_low:
+        visual_in_title = any(term in title_low for term in VISUAL_TITLE_TERMS)
+        acronym_in_title = bool(re.search(r"\b(?:mllms?|lvlms?|vlms?)\b", title_low))
+        # MLLM is also used for "multilingual LLM" in NLP papers.
+        if "multilingual" in title_low and not visual_in_title:
+            acronym_in_title = False
+        if visual_in_title or acronym_in_title or re.search(r"\bgui\b", title_low):
+            return True
+        return False
+    return False
+
+
+def is_abstract_related(title: str, abstract: str = "") -> bool:
+    """Accept abstract-grounded candidates, but keep them outside Core."""
+    title_low = title.lower()
+    abstract_low = abstract.lower()
+    return (
+        abstract_low.count("hallucin") >= 2
+        and any(term in abstract_low for term in MODEL_TERMS)
+        and any(term in abstract_low for term in ABSTRACT_VISUAL_CUES)
+        and any(term in title_low for term in (
+            "vision", "visual", "image", "multimodal", "multi-modal", "mllm",
+            "lvlm", "vlm", "video", "caption", "ground", "factual", "evidence",
+            "alignment", "calibration", "attention",
+        ))
+    )
+
+
+def is_related(title: str) -> bool:
     low = title.lower()
-    return "hallucin" in low and any(term in low for term in VISUAL_TERMS)
+    return any(term in low for term in MODEL_TERMS) and any(
+        cue in low for cue in RELATED_CUES
+    )
+
+
+def scope_for(title: str, abstract: str = "") -> str | None:
+    if is_direct(title, abstract):
+        return "Core"
+    if is_related(title) or is_abstract_related(title, abstract):
+        return "Related"
+    return None
 
 
 class ProceedingsParser(HTMLParser):
@@ -109,7 +200,7 @@ class ICMLParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         href = dict(attrs).get("href", "")
-        if tag == "a" and "/virtual/2026/poster/" in href:
+        if tag == "a" and re.search(r"/virtual/20\d{2}/poster/", href):
             self.active = True
             self.href = href
             self.buf = []
@@ -124,7 +215,74 @@ class ICMLParser(HTMLParser):
             self.active = False
 
 
-RELATED_ICML = {
+def pmlr_rows(text: str) -> list[tuple[str, str]]:
+    rows: list[tuple[str, str]] = []
+    pattern = re.compile(
+        r'<div class="paper">.*?<p class="title">(.*?)</p>.*?'
+        r'<p class="links">\s*\[<a href="([^"]+\.html)">abs</a>',
+        re.S,
+    )
+    for raw_title, href in pattern.findall(text):
+        rows.append((clean(raw_title), href))
+    return rows
+
+
+def anthology_rows(text: str, year: int, family: str) -> list[tuple[str, str, str, bool]]:
+    """Return official ACL-family paper id, title, abstract, and Findings flag."""
+    pattern = re.compile(
+        r'<strong><a[^>]+href=/?([^/" >]+)/(?:[^>]*)>(.*?)</a></strong>',
+        re.S,
+    )
+    matches = list(pattern.finditer(text))
+    rows: list[tuple[str, str, str, bool]] = []
+    family_low = family.lower()
+    accepted_prefixes = (f"{year}.{family_low}-", f"{year}.findings-{family_low}.")
+    for index, match in enumerate(matches):
+        paper_id = match.group(1)
+        if not paper_id.startswith(accepted_prefixes):
+            continue
+        title = clean(match.group(2))
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        segment = text[match.end():end]
+        abstract_match = re.search(
+            r'class="card-body p-3 small">(.*?)</div></div>', segment, re.S
+        )
+        abstract = clean(abstract_match.group(1)) if abstract_match else ""
+        rows.append((paper_id, title, abstract, f"findings-{family_low}" in paper_id))
+    return rows
+
+
+RELATED_ICML_BY_YEAR = {
+2023: {
+    "ILLUME: Rationalizing Vision-Language Models through Human Interactions",
+    "Grounding Language Models to Images for Multimodal Inputs and Outputs",
+    "Calibrating Multimodal Learning",
+    "Retrieval-Augmented Multimodal Language Modeling",
+},
+2024: {
+    "MLLM-as-a-Judge: Assessing Multimodal LLM-as-a-Judge with Vision-Language Benchmark",
+    "GeoReasoner: Geo-localization with Reasoning in Street Views using a Large Vision-Language Model",
+    "Revisiting the Role of Language Priors in Vision-Language Models",
+    "An Empirical Study Into What Matters for Calibrating Vision-Language Models",
+    "ConTextual: Evaluating Context-Sensitive Text-Rich Visual Reasoning in Large Multimodal Models",
+    "Diagnosing the Compositional Knowledge of Vision Language Models from a Game-Theoretic View",
+    "MMT-Bench: A Comprehensive Multimodal Benchmark for Evaluating Large Vision-Language Models Towards Multitask AGI",
+    "MM-Vet: Evaluating Large Multimodal Models for Integrated Capabilities",
+},
+2025: {
+    "DEFAME: Dynamic Evidence-based FAct-checking with Multimodal Experts",
+    "Can MLLMs Reason in Multimodality? EMMA: An Enhanced MultiModal ReAsoning Benchmark",
+    "Do Vision-Language Models Really Understand Visual Language?",
+    "MME-CoT: Benchmarking Chain-of-Thought in Large Multimodal Models for Reasoning Quality, Robustness, and Efficiency",
+    "Toward Robust Hyper-Detailed Image Captioning: A Multiagent Approach and Dual Evaluation Metrics for Factuality and Coverage",
+    "Core Knowledge Deficits in Multi-Modal Language Models",
+    "Reasoning Limitations of Multimodal Large Language Models. A case study of Bongard Problems",
+    "Generalizing from SIMPLE to HARD Visual Reasoning: Can We Mitigate Modality Imbalance in VLMs?",
+    "Towards Rationale-Answer Alignment of LVLMs via Self-Rationale Calibration",
+    "Re-ranking Reasoning Context with Tree Search Makes Large Vision-Language Models Stronger",
+    "Robust Multimodal Large Language Models Against Modality Conflict",
+},
+2026: {
     "Bad Seeing or Bad Thinking? Rewarding Perception for Multimodal Reasoning",
     "Decomposed On-Policy Distillation for Vision-Language Reasoning: Steering Gradients for Visual Grounding",
     "DeFacto: Counterfactual Thinking with Images for Enforcing Evidence-Grounded and Faithful Reasoning",
@@ -148,6 +306,7 @@ RELATED_ICML = {
     "Visual Persuasion: What Influences Decisions of Vision-Language Models?",
     "VLM-RobustBench: A Comprehensive Benchmark for Robustness of Vision-Language Models",
     "ZeroBench: An Impossible Visual Benchmark for Contemporary Large Multimodal Models",
+},
 }
 
 
@@ -155,6 +314,7 @@ EXCLUDE = (
     "3d generation", "3d content generation", "image restoration", "deepfake",
     "text-to-image synthesis", "hallucination-inducing image generation",
     "controlled visual hallucination via thalamus", "sign language translation",
+    "visual scene hallucination",
 )
 
 
@@ -263,15 +423,38 @@ def main() -> None:
     seen: set[str] = set()
     rows: list[dict] = []
 
-    # ICML 2026 official poster directory.
+    # ICLR 2023 predates the proceedings.iclr.cc index used for later years.
+    # These accepted papers were verified on the official OpenReview venue.
+    for title, url in (
+        (
+            "Visually-Augmented Language Modeling",
+            "https://openreview.net/forum?id=8IN-qLkl215",
+        ),
+        (
+            "When and Why Vision-Language Models Behave Like Bags-of-Words, and What to Do About It?",
+            "https://openreview.net/forum?id=KRLUvxh8uaX",
+        ),
+    ):
+        add(rows, seen, title, url, "ICLR 2023", 2023, "Related")
+
+    # ICML 2023-2025 PMLR volumes and the ICML 2026 official poster directory.
+    # Earlier versions only expanded 2026, which distorted the year distribution.
+    for year in (2023, 2024, 2025):
+        path = Path(f"/private/tmp/icml{year}.html")
+        if not path.exists():
+            continue
+        for title, href in pmlr_rows(path.read_text(errors="ignore")):
+            scope = "Related" if title in RELATED_ICML_BY_YEAR.get(year, set()) else scope_for(title)
+            if scope:
+                add(rows, seen, title, href, f"ICML {year}", year, scope)
+
     path = Path("/private/tmp/icml2026.html")
     if path.exists():
         parser = ICMLParser(); parser.feed(path.read_text(errors="ignore"))
         for title, href in parser.rows:
-            if is_direct(title):
-                add(rows, seen, title, "https://icml.cc" + href, "ICML 2026", 2026)
-            elif title in RELATED_ICML:
-                add(rows, seen, title, "https://icml.cc" + href, "ICML 2026", 2026, "Related")
+            scope = "Related" if title in RELATED_ICML_BY_YEAR[2026] else scope_for(title)
+            if scope:
+                add(rows, seen, title, "https://icml.cc" + href, "ICML 2026", 2026, scope)
 
     # ICLR and NeurIPS official proceedings indexes.
     for path in sorted(Path("/private/tmp").glob("iclr20*.html")) + sorted(Path("/private/tmp").glob("neurips20*.html")):
@@ -285,8 +468,9 @@ def main() -> None:
         base = "https://proceedings.iclr.cc" if venue.startswith("ICLR") else "https://proceedings.neurips.cc"
         parser = ProceedingsParser(); parser.feed(path.read_text(errors="ignore"))
         for title, href in parser.rows:
-            if is_direct(title):
-                add(rows, seen, title, base + href, venue, year)
+            scope = scope_for(title)
+            if scope:
+                add(rows, seen, title, base + href, venue, year, scope)
 
     # CVPR and ICCV official CVF Open Access indexes.
     for path in sorted(Path("/private/tmp").glob("cvpr20*.html")) + sorted(Path("/private/tmp").glob("iccv20*.html")):
@@ -297,31 +481,42 @@ def main() -> None:
         venue = ("CVPR" if path.name.startswith("cvpr") else "ICCV") + f" {year}"
         parser = CVFParser(); parser.feed(path.read_text(errors="ignore"))
         for title, href in parser.rows:
-            if is_direct(title):
-                add(rows, seen, title, "https://openaccess.thecvf.com" + href, venue, year)
+            scope = scope_for(title)
+            if scope:
+                add(rows, seen, title, "https://openaccess.thecvf.com" + href, venue, year, scope)
 
     # ECCV official ECVA index (currently relevant 2024 entries).
     path = Path("/private/tmp/eccv-index.html")
     if path.exists():
         parser = CVFParser(); parser.feed(path.read_text(errors="ignore"))
         for title, href in parser.rows:
-            if "eccv_2024" in href.lower() and is_direct(title):
-                add(rows, seen, title, "https://www.ecva.net/" + href, "ECCV 2024", 2024)
+            match = re.search(r"eccv_(20\d{2})", href.lower())
+            if not match:
+                continue
+            year = int(match.group(1))
+            scope = scope_for(title)
+            if scope:
+                add(rows, seen, title, "https://www.ecva.net/" + href, f"ECCV {year}", year, scope)
 
-    # ACL Anthology event pages for EMNLP/NAACL. Title-level matching avoids
-    # pulling in papers that merely mention hallucination in related work.
-    pattern = re.compile(r'<strong><a[^>]+href=/?([^/ >]+)/(?:[^>]*)>(.*?)</a></strong>', re.S)
-    for path in sorted(Path("/private/tmp").glob("emnlp20*.html")) + sorted(Path("/private/tmp").glob("naacl20*.html")):
+    # ACL Anthology event pages for ACL/EMNLP/NAACL.  These official pages expose
+    # abstracts, so a paper whose title is generic but whose abstract explicitly
+    # studies visual/multimodal hallucination can still be recovered.
+    anthology_paths = (
+        sorted(Path("/private/tmp").glob("acl20*.html"))
+        + sorted(Path("/private/tmp").glob("emnlp20*.html"))
+        + sorted(Path("/private/tmp").glob("naacl20*.html"))
+    )
+    for path in anthology_paths:
         match = re.search(r"(20\d{2})", path.name)
         if not match:
             continue
         year = int(match.group(1))
-        family = "EMNLP" if path.name.startswith("emnlp") else "NAACL"
-        for paper_id, raw_title in pattern.findall(path.read_text(errors="ignore")):
-            title = clean(raw_title)
-            if is_direct(title):
-                venue = family + (" Findings" if "findings" in paper_id else "") + f" {year}"
-                add(rows, seen, title, f"https://aclanthology.org/{paper_id}/", venue, year)
+        family = "ACL" if path.name.startswith("acl") else ("EMNLP" if path.name.startswith("emnlp") else "NAACL")
+        for paper_id, title, abstract, findings in anthology_rows(path.read_text(errors="ignore"), year, family):
+            scope = scope_for(title, abstract)
+            if scope:
+                venue = family + (" Findings" if findings else "") + f" {year}"
+                add(rows, seen, title, f"https://aclanthology.org/{paper_id}/", venue, year, scope)
 
     # Additional AAAI papers verified on the official OJS article pages.
     manual = [
@@ -330,12 +525,19 @@ def main() -> None:
         (2026, "Verb Mirage: Unveiling and Assessing Verb Concept Hallucinations in Multimodal Large Language Models", "https://ojs.aaai.org/index.php/AAAI/article/view/38005"),
         (2026, "OmniDPO: A Preference Optimization Framework to Address Omni-Modal Hallucination", "https://ojs.aaai.org/index.php/AAAI/article/view/39104"),
         (2026, "Multi-Agent Undercover Gaming: Hallucination Removal Through Counterfactual Test for Multimodal Reasoning", "https://ojs.aaai.org/index.php/AAAI/article/view/37613"),
+        (2026, "Seeing Is Believing: Rich-Context Hallucination Detection for MLLMs via Backward Visual Grounding", "https://ojs.aaai.org/index.php/AAAI/article/view/40345"),
+        (2026, "ASCD: Attention-Steerable Contrastive Decoding for Reducing Hallucination in MLLM", "https://ojs.aaai.org/index.php/AAAI/article/view/38000"),
+        (2026, "Ground What You See: Hallucination-Resistant MLLMs via Caption Feedback, Diversity-Aware Sampling, and Conflict Regularization", "https://ojs.aaai.org/index.php/AAAI/article/view/37772"),
+        (2026, "When Eyes and Ears Disagree: Can MLLMs Discern Audio-Visual Confusion?", "https://ojs.aaai.org/index.php/AAAI/article/view/38183"),
         (2025, "ConVis: Contrastive Decoding with Hallucination Visualization for Mitigating Hallucinations in Multimodal Large Language Models", "https://ojs.aaai.org/index.php/AAAI/article/view/32689"),
         (2025, "MoLE: Decoding by Mixture of Layer Experts Alleviates Hallucination in Large Vision-Language Models", "https://ojs.aaai.org/index.php/AAAI/article/view/34056"),
         (2025, "MHBench: Demystifying Motion Hallucination in VideoLLMs", "https://ojs.aaai.org/index.php/AAAI/article/view/32463"),
+        (2025, "RoVRM: A Robust Visual Reward Model Optimized via Auxiliary Textual Preference Data", "https://ojs.aaai.org/index.php/AAAI/article/view/34721"),
+        (2024, "Adventures of Trustworthy Vision-Language Models: A Survey", "https://ojs.aaai.org/index.php/AAAI/article/view/30275"),
     ]
     for year, title, url in manual:
-        add(rows, seen, title, url, f"AAAI {year}", year)
+        scope = "Related" if title.startswith(("When Eyes and Ears", "RoVRM", "Adventures of Trustworthy")) else "Core"
+        add(rows, seen, title, url, f"AAAI {year}", year, scope)
 
     # IJCV currently has adjacent LVLM reliability work but no title-explicit
     # core hallucination paper in the audited 2023-2026 results.
