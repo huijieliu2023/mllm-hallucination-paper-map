@@ -60,6 +60,12 @@
         ,"The Hidden Life of Tokens: Reducing Hallucination of Large Vision-Language Models Via Visual Information Steering":["ICML 2025","Target venue","https://proceedings.mlr.press/v267/li25ca.html"]
         ,"Mitigating Object Hallucination in Large Vision-Language Models via Image-Grounded Guidance":["ICML 2025","Target venue","https://proceedings.mlr.press/v267/zhao25j.html"]
         ,"Evaluating and Analyzing Relationship Hallucinations in Large Vision-Language Models":["ICML 2024","Target venue","https://proceedings.mlr.press/v235/wu24l.html"]
+        ,"Mitigating Hallucinations in Vision-Language Models through Image-Guided Head Suppression":["EMNLP 2025","Target venue","https://aclanthology.org/2025.emnlp-main.631/"]
+        ,"Multi-Frequency Contrastive Decoding: Alleviating Hallucinations for Large Vision-Language Models":["EMNLP 2025","Target venue","https://aclanthology.org/2025.emnlp-main.1452/"]
+        ,"SHARP: Steering Hallucination in LVLMs via Representation Engineering":["EMNLP 2025","Target venue","https://aclanthology.org/2025.emnlp-main.725/"]
+        ,"Mitigating Hallucinations in Large Vision-Language Models via Entity-Centric Multimodal Preference Optimization":["EMNLP 2025","Target venue","https://aclanthology.org/2025.emnlp-main.982/"]
+        ,"Beyond Logit Lens: Contextual Embeddings for Robust Hallucination Detection & Grounding in VLMs":["NAACL 2025","Target venue","https://aclanthology.org/2025.naacl-long.488/"]
+        ,"Mitigating Hallucinations in Large Vision-Language Models via Summary-Guided Decoding":["NAACL Findings 2025","Target venue","https://aclanthology.org/2025.findings-naacl.235/"]
       };
       const translations={
         "Evaluating Object Hallucination in Large Vision-Language Models":{zhTitle:"评估大视觉语言模型中的对象幻觉",zhAbstract:"作者提出 POPE，通过正、负对象存在性问题诊断大视觉语言模型是否会将图像中不存在的对象误认为存在，并分析不同采样策略对评测的影响。"},
@@ -98,7 +104,13 @@
         {id:'M159',year:2025,method:'TL-DPO',title:'Stop Learning it all to Mitigate Visual Hallucination, Focus on the Hallucination Target',url:'https://openaccess.thecvf.com/content/CVPR2025/papers/Yoon_Stop_Learning_it_all_to_Mitigate_Visual_Hallucination_Focus_on_CVPR_2025_paper.pdf',label:'缓解方法'},
         {id:'M160',year:2025,method:'Visual Information Steering',title:'The Hidden Life of Tokens: Reducing Hallucination of Large Vision-Language Models Via Visual Information Steering',url:'https://proceedings.mlr.press/v267/li25ca.html',label:'缓解方法'},
         {id:'M161',year:2025,method:'Image-Grounded Guidance',title:'Mitigating Object Hallucination in Large Vision-Language Models via Image-Grounded Guidance',url:'https://proceedings.mlr.press/v267/zhao25j.html',label:'缓解方法'},
-        {id:'M162',year:2024,method:'R-Bench',title:'Evaluating and Analyzing Relationship Hallucinations in Large Vision-Language Models',url:'https://proceedings.mlr.press/v235/wu24l.html',label:'评价与检测'}
+        {id:'M162',year:2024,method:'R-Bench',title:'Evaluating and Analyzing Relationship Hallucinations in Large Vision-Language Models',url:'https://proceedings.mlr.press/v235/wu24l.html',label:'评价与检测'},
+        {id:'M167',year:2025,method:'SPIN',title:'Mitigating Hallucinations in Vision-Language Models through Image-Guided Head Suppression',url:'https://aclanthology.org/2025.emnlp-main.631/',label:'缓解方法'},
+        {id:'M168',year:2025,method:'MFCD',title:'Multi-Frequency Contrastive Decoding: Alleviating Hallucinations for Large Vision-Language Models',url:'https://aclanthology.org/2025.emnlp-main.1452/',label:'缓解方法'},
+        {id:'M169',year:2025,method:'SHARP',title:'SHARP: Steering Hallucination in LVLMs via Representation Engineering',url:'https://aclanthology.org/2025.emnlp-main.725/',label:'缓解方法'},
+        {id:'M170',year:2025,method:'EMPO',title:'Mitigating Hallucinations in Large Vision-Language Models via Entity-Centric Multimodal Preference Optimization',url:'https://aclanthology.org/2025.emnlp-main.982/',label:'缓解方法'},
+        {id:'M171',year:2025,method:'ContextualLens',title:'Beyond Logit Lens: Contextual Embeddings for Robust Hallucination Detection & Grounding in VLMs',url:'https://aclanthology.org/2025.naacl-long.488/',label:'评价与检测；缓解方法'},
+        {id:'M172',year:2025,method:'Summary-Guided Decoding',title:'Mitigating Hallucinations in Large Vision-Language Models via Summary-Guided Decoding',url:'https://aclanthology.org/2025.findings-naacl.235/',label:'缓解方法'}
       );
       embeddedCorpus.splice(0,embeddedCorpus.length,...embeddedCorpus.map(p=>{const hit=verified[p.title],translation=translations[p.title]||{},role=p.label.includes('评价')&&p.label.includes('缓解')?'Both':p.label.includes('缓解')?'Mitigation':'Evaluation';return {...p,role,venue:hit?hit[0]:'Preprint / venue to verify',tier:hit?hit[1]:'Unverified venue',official:hit&&hit[2],...translation}}));
       const fallback=embeddedCorpus;
