@@ -1,7 +1,7 @@
 # 多模态大模型忠实性：方法分类与文献矩阵（2023—2026）
 
 **版本日期：** 2026 年 9 月 14 日  
-**核心条目：** 147 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
+**核心条目：** 155 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
 **年份范围：** 2023—2026。2026 条目只有在正式 proceedings 页面可核验时才标注目标会议。
 
 ## 官方会议/期刊补充（2025—2026）
@@ -29,6 +29,14 @@
 | M149 | 2026 | RFI | [RFI: Rectified Flow Intervention for Mitigating Object Hallucination in Large Vision-Language Models](https://ojs.aaai.org/index.php/AAAI/article/view/37320) | 缓解方法 |
 | M150 | 2026 | Taming the Phantom | [Taming the Phantom: Token-Asymmetric Filtering for Hallucination Mitigation in Large Vision-Language Models](https://ojs.aaai.org/index.php/AAAI/article/view/37768) | 缓解方法 |
 | M151 | 2026 | EchoBat | [EchoBat: Echo-Vision Enhancement and Echo-Layered Sampling for Video LLMs Hallucination Mitigation](https://ojs.aaai.org/index.php/AAAI/article/view/40875) | 缓解方法 |
+| M152 | 2025 | SECOND | [SECOND: Mitigating Perceptual Hallucination in Vision-Language Models via Selective and Contrastive Decoding](https://proceedings.mlr.press/v267/park25c.html) | 缓解方法 |
+| M153 | 2024 | HALC | [HALC: Object Hallucination Reduction via Adaptive Focal-Contrast Decoding](https://proceedings.mlr.press/v235/chen24bi.html) | 缓解方法 |
+| M154 | 2025 | Common-O | [What’s in Common? Multimodal Models Hallucinate When Reasoning Across Scenes](https://proceedings.neurips.cc/paper_files/paper/2025/hash/3e5b0db387078ac4968fd536d3c3a019-Abstract-Datasets_and_Benchmarks_Track.html) | 评价与检测 |
+| M155 | 2025 | CMM | [The Curse of Multi-Modalities: Evaluating Hallucinations of Large Multimodal Models across Language, Visual, and Audio](https://proceedings.neurips.cc/paper_files/paper/2025/hash/9b0b18a77421d45d26c3df5612caefe7-Abstract-Datasets_and_Benchmarks_Track.html) | 评价与检测 |
+| M156 | 2024 | VHTest | [Visual Hallucinations of Multi-modal Large Language Models](https://aclanthology.org/2024.findings-acl.573/) | 评价与检测 |
+| M157 | 2024 | VCD | [Mitigating Object Hallucinations in Large Vision-Language Models through Visual Contrastive Decoding](https://openaccess.thecvf.com/content/CVPR2024/html/Leng_Mitigating_Object_Hallucinations_in_Large_Vision-Language_Models_through_Visual_Contrastive_CVPR_2024_paper.html) | 缓解方法 |
+| M158 | 2025 | HalLoc | [HalLoc: Token-level Localization of Hallucinations for Vision Language Models](https://openaccess.thecvf.com/content/CVPR2025/html/Park_HalLoc_Token-level_Localization_of_Hallucinations_for_Vision_Language_Models_CVPR_2025_paper.html) | 评价与检测 |
+| M159 | 2025 | TL-DPO | [Stop Learning it all to Mitigate Visual Hallucination, Focus on the Hallucination Target](https://openaccess.thecvf.com/content/CVPR2025/papers/Yoon_Stop_Learning_it_all_to_Mitigate_Visual_Hallucination_Focus_on_CVPR_2025_paper.pdf) | 缓解方法 |
 
 本矩阵是综述论文的可追溯证据附表。条目首先由领域综述及其维护的公开文献库形成召回集，再以 arXiv API 核验标题、作者和时间元数据。它是结构化叙述综述的核心样本，不等同于数据库穷尽式系统综述。
 
