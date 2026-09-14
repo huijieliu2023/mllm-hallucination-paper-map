@@ -40,6 +40,16 @@
 | M160 | 2025 | Visual Information Steering | [The Hidden Life of Tokens: Reducing Hallucination of Large Vision-Language Models Via Visual Information Steering](https://proceedings.mlr.press/v267/li25ca.html) | 缓解方法 |
 | M161 | 2025 | Image-Grounded Guidance | [Mitigating Object Hallucination in Large Vision-Language Models via Image-Grounded Guidance](https://proceedings.mlr.press/v267/zhao25j.html) | 缓解方法 |
 | M162 | 2024 | R-Bench | [Evaluating and Analyzing Relationship Hallucinations in Large Vision-Language Models](https://proceedings.mlr.press/v235/wu24l.html) | 评价与检测 |
+| M163 | 2024 | Object Grounding | [Does Object Grounding Really Reduce Hallucination of Large Vision-Language Models?](https://aclanthology.org/2024.emnlp-main.159/) | 评价与检测 |
+| M164 | 2024 | VisDiaHalBench | [VisDiaHalBench: A Visual Dialogue Benchmark For Diagnosing Hallucination in Large Vision-Language Models](https://aclanthology.org/2024.acl-long.658/) | 评价与检测 |
+| M165 | 2026 | Textual Embeddings | [Towards Mitigating Hallucinations in Large Vision-Language Models by Refining Textual Embeddings](https://aclanthology.org/2026.findings-acl.2086/) | 缓解方法 |
+| M166 | 2026 | Vision-Language Introspection | [Vision-Language Introspection: Mitigating Overconfident Hallucinations in MLLMs via Interpretable Bi-Causal Steering](https://aclanthology.org/2026.acl-long.1784/) | 缓解方法 |
+| M167 | 2025 | SPIN | [Mitigating Hallucinations in Vision-Language Models through Image-Guided Head Suppression](https://aclanthology.org/2025.emnlp-main.631/) | 缓解方法 |
+| M168 | 2025 | MFCD | [Multi-Frequency Contrastive Decoding: Alleviating Hallucinations for Large Vision-Language Models](https://aclanthology.org/2025.emnlp-main.1452/) | 缓解方法 |
+| M169 | 2025 | SHARP | [SHARP: Steering Hallucination in LVLMs via Representation Engineering](https://aclanthology.org/2025.emnlp-main.725/) | 缓解方法 |
+| M170 | 2025 | EMPO | [Mitigating Hallucinations in Large Vision-Language Models via Entity-Centric Multimodal Preference Optimization](https://aclanthology.org/2025.emnlp-main.982/) | 缓解方法 |
+| M171 | 2025 | ContextualLens | [Beyond Logit Lens: Contextual Embeddings for Robust Hallucination Detection & Grounding in VLMs](https://aclanthology.org/2025.naacl-long.488/) | 评价与检测；缓解方法 |
+| M172 | 2025 | Summary-Guided Decoding | [Mitigating Hallucinations in Large Vision-Language Models via Summary-Guided Decoding](https://aclanthology.org/2025.findings-naacl.235/) | 缓解方法 |
 
 本矩阵是综述论文的可追溯证据附表。条目首先由领域综述及其维护的公开文献库形成召回集，再以 arXiv API 核验标题、作者和时间元数据。它是结构化叙述综述的核心样本，不等同于数据库穷尽式系统综述。
 
