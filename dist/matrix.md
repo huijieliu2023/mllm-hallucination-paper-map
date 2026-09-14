@@ -1,7 +1,7 @@
 # 多模态大模型忠实性：方法分类与文献矩阵（2023—2026）
 
 **版本日期：** 2026 年 9 月 14 日  
-**核心条目：** 158 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
+**核心条目：** 175 篇去重候选论文；其中包括经正式 proceedings 核验的指定会议条目。  
 **年份范围：** 2023—2026。2026 条目只有在正式 proceedings 页面可核验时才标注目标会议。
 
 ## 官方会议/期刊补充（2025—2026）
@@ -50,6 +50,23 @@
 | M170 | 2025 | EMPO | [Mitigating Hallucinations in Large Vision-Language Models via Entity-Centric Multimodal Preference Optimization](https://aclanthology.org/2025.emnlp-main.982/) | 缓解方法 |
 | M171 | 2025 | ContextualLens | [Beyond Logit Lens: Contextual Embeddings for Robust Hallucination Detection & Grounding in VLMs](https://aclanthology.org/2025.naacl-long.488/) | 评价与检测；缓解方法 |
 | M172 | 2025 | Summary-Guided Decoding | [Mitigating Hallucinations in Large Vision-Language Models via Summary-Guided Decoding](https://aclanthology.org/2025.findings-naacl.235/) | 缓解方法 |
+| M173 | 2026 | Anchor-Final | [Anchor-Final Self-Supervision Drives Hallucination-Aware Optimization in Large Vision-Language Models](https://icml.cc/virtual/2026/poster/63887) | 缓解方法 |
+| M174 | 2026 | Automatic Layer Selection | [Automatic Layer Selection for Hallucination Detection](https://icml.cc/virtual/2026/poster/61195) | 评价与检测 |
+| M175 | 2026 | Spectral Surgery | [Beyond Attention Imbalance: Mitigating Hallucinations via Spectral Surgery](https://icml.cc/virtual/2026/poster/63155) | 缓解方法 |
+| M176 | 2026 | Visual Rectification | [Beyond Blind Noising: Disentangled Visual Rectification for Hallucination Mitigation in MLLMs](https://icml.cc/virtual/2026/poster/63609) | 缓解方法 |
+| M177 | 2026 | Attention Contrastive Decoding | [Beyond Logits: Coherent Hallucination Mitigation via Attention Contrastive Decoding](https://icml.cc/virtual/2026/poster/63322) | 缓解方法 |
+| M178 | 2026 | Conflict-Aware Adaptive Alignment | [Conflict-Aware Adaptive Alignment for LLM Hallucination Mitigation](https://icml.cc/virtual/2026/poster/60877) | 缓解方法 |
+| M179 | 2026 | DOUBT | [DOUBT: Decoupled Object-level Understanding and Bridging via vMF-based Trustworthiness for Hallucination Detection in MLLMs](https://icml.cc/virtual/2026/poster/64161) | 评价与检测 |
+| M180 | 2026 | Efficient Hallucination Detection | [Efficient Hallucination Detection for LLMs Using Uncertainty-Aware Attention Heads](https://icml.cc/virtual/2026/poster/61700) | 评价与检测 |
+| M181 | 2026 | ILVAD | [Finding the Correct Visual Evidence Without Forgetting: Mitigating Hallucination in LVLMs via Inter-Layer Visual Attention Discrepancy](https://icml.cc/virtual/2026/poster/63514) | 缓解方法 |
+| M182 | 2026 | OOD-to-Hallucination | [From Out-of-Distribution Detection to Hallucination Detection: A Geometric View](https://icml.cc/virtual/2026/poster/62687) | 评价与检测 |
+| M183 | 2026 | HaloProbe | [HaloProbe: Bayesian Detection and Mitigation of Object Hallucinations in Vision-Language Models](https://icml.cc/virtual/2026/poster/62157) | 评价与检测；缓解方法 |
+| M184 | 2026 | Reasoning Trajectories | [Harnessing Reasoning Trajectories for Hallucination Detection via Answer-agreement Representation Shaping](https://icml.cc/virtual/2026/poster/62434) | 评价与检测 |
+| M185 | 2026 | Instruction Lens Score | [Instruction Lens Score: Your Instruction Contributes a Powerful Object Hallucination Detector for Multimodal Large Language Models](https://icml.cc/virtual/2026/poster/62062) | 评价与检测 |
+| M186 | 2026 | IRIS | [IRIS: Implicit Reward-Guided Internal Sifting for Mitigating Multimodal Hallucination](https://icml.cc/virtual/2026/poster/60532) | 缓解方法 |
+| M187 | 2026 | MEDA | [MEDA: Medical-Oriented Activation Editing for Hallucination Mitigation in Medical Large Vision-Language Model](https://icml.cc/virtual/2026/poster/63562) | 缓解方法 |
+| M188 | 2026 | REVIS | [REVIS: Sparse Latent Steering to Mitigate Object Hallucination in Large Vision-Language Models](https://icml.cc/virtual/2026/poster/65900) | 缓解方法 |
+| M189 | 2026 | Visual-Sensitivity Steering | [Steer Where It Matters: Token-Level Visual-Sensitivity Steering for LVLMs Hallucination Mitigation](https://icml.cc/virtual/2026/poster/62374) | 缓解方法 |
 
 本矩阵是综述论文的可追溯证据附表。条目首先由领域综述及其维护的公开文献库形成召回集，再以 arXiv API 核验标题、作者和时间元数据。它是结构化叙述综述的核心样本，不等同于数据库穷尽式系统综述。
 
