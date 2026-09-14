@@ -48,7 +48,7 @@ VISUAL_TERMS = (
 VISUAL_TITLE_TERMS = (
     "vision-language", "vision language", "visual language", "multimodal",
     "multi-modal", "mllm", "lvlm", "vlm", "videollm", "video llm",
-    "video large language", "audio-visual", "audio visual", "visual hallucination",
+    "video large language", "video language model", "audio-visual", "audio visual", "visual hallucination",
     "image caption", "captioning", "object hallucination", "relationship hallucination",
     "relation hallucination", "spatial hallucination", "motion hallucination",
     "scene hallucination", "document vqa", "ocr",
@@ -68,7 +68,7 @@ MODEL_TERMS = (
     "vision-language model", "vision language model", "visual language model",
     "large vision-language", "large vision language", "multimodal large language",
     "multi-modal large language", "large multimodal model", "large multi-modal model",
-    "mllm", "lvlm", "video llm", "videollm", "audio-visual large language",
+    "mllm", "lvlm", "video llm", "videollm", "video language model", "audio-visual large language",
     "vision) language model", "image-text generation", "interleaved image",
     "document vqa",
 )
@@ -90,22 +90,33 @@ RELATED_CUES = (
 
 def is_direct(title: str, abstract: str = "") -> bool:
     title_low = title.lower()
-    abstract_low = abstract.lower()
-    combined = f"{title_low} {abstract_low}"
     if "hallucin" in title_low:
-        visual_in_title = any(term in title_low for term in VISUAL_TITLE_TERMS)
-        acronym_in_title = bool(re.search(r"\b(?:mllms?|lvlms?|vlms?)\b", title_low))
-        # MLLM is also used for "multilingual LLM" in NLP papers.
-        if "multilingual" in title_low and not visual_in_title:
-            acronym_in_title = False
-        if visual_in_title or acronym_in_title or re.search(r"\bgui\b", title_low):
-            return True
-        return False
+        return title_is_visual(title)
     return False
 
 
+def title_is_visual(title: str) -> bool:
+    title_low = title.lower()
+    visual_in_title = any(term in title_low for term in VISUAL_TITLE_TERMS)
+    acronym_in_title = bool(re.search(r"\b(?:mllms?|lvlms?|vlms?)\b", title_low))
+    # MLLM is also used for "multilingual LLM" in NLP papers.
+    if "multilingual" in title_low and not visual_in_title:
+        acronym_in_title = False
+    return bool(visual_in_title or acronym_in_title or re.search(r"\bgui\b", title_low))
+
+
+def is_abstract_core(title: str, abstract: str = "") -> bool:
+    """Hallucination is a repeated subject in an official LVLM/VLM abstract."""
+    abstract_low = abstract.lower()
+    return (
+        abstract_low.count("hallucin") >= 2
+        and any(term in abstract_low for term in MODEL_TERMS)
+        and any(term in abstract_low for term in ABSTRACT_VISUAL_CUES)
+    )
+
+
 def is_abstract_related(title: str, abstract: str = "") -> bool:
-    """Accept abstract-grounded candidates, but keep them outside Core."""
+    """Conservative fallback for event pages outside the detail-page audit."""
     title_low = title.lower()
     abstract_low = abstract.lower()
     return (
@@ -118,6 +129,21 @@ def is_abstract_related(title: str, abstract: str = "") -> bool:
             "alignment", "calibration", "attention",
         ))
     )
+
+
+def scope_for_detail_page(title: str, abstract: str = "") -> str | None:
+    """Richer rule used only for audited CVPR/ICLR/NeurIPS detail pages."""
+    if is_direct(title, abstract):
+        return "Core"
+    abstract_low = abstract.lower()
+    if is_related(title) or is_abstract_core(title, abstract) or (
+        "hallucin" in abstract_low
+        and title_is_visual(title)
+        and any(term in abstract_low for term in MODEL_TERMS)
+        and any(term in abstract_low for term in ABSTRACT_VISUAL_CUES)
+    ):
+        return "Related"
+    return None
 
 
 def is_related(title: str) -> bool:
@@ -310,11 +336,119 @@ RELATED_ICML_BY_YEAR = {
 }
 
 
+# Audited adjacent work from the same complete official proceedings indexes.
+# These papers test perceptual evidence use, compositional failures, confidence,
+# calibration, or reasoning faithfulness without necessarily using the word
+# "hallucination" in the title or abstract.
+RELATED_OFFICIAL_BY_VENUE_YEAR = {
+    ("CVPR", 2023): {
+        "CREPE: Can Vision-Language Foundation Models Reason Compositionally?",
+        "Exploring the Effect of Primitives for Compositional Generalization in Vision-and-Language",
+        "Improving Visual Grounding by Encouraging Consistent Gradient-Based Explanations",
+        "MAP: Multimodal Uncertainty-Aware Vision-Language Pre-Training Model",
+        "ViLEM: Visual-Language Error Modeling for Image-Text Retrieval",
+        "Visual Programming: Compositional Visual Reasoning Without Training",
+    },
+    ("CVPR", 2024): {
+        "Compositional Chain-of-Thought Prompting for Large Multimodal Models",
+        "Consistency and Uncertainty: Identifying Unreliable Responses From Black-Box Vision-Language Models for Selective Visual Question Answering",
+        "Grounding Everything: Emerging Localization Properties in Vision-Language Transformers",
+        "Improved Visual Grounding through Self-Consistent Explanations",
+        "Iterated Learning Improves Compositionality in Large Vision-Language Models",
+    },
+    ("CVPR", 2025): {
+        "Can Large Vision-Language Models Correct Semantic Grounding Errors By Themselves?",
+        "CoSpace: Benchmarking Continuous Space Perception Ability for Vision-Language Models",
+        "Critic-V: VLM Critics Help Catch VLM Errors in Multimodal Reasoning",
+        "DART: Disease-aware Image-Text Alignment and Self-correcting Re-alignment for Trustworthy Radiology Report Generation",
+        "Debiasing Multimodal Large Language Models via Noise-Aware Preference Optimization",
+        "Enhancing Vision-Language Compositional Understanding with Multimodal Synthetic Data",
+        "Identifying and Mitigating Position Bias of Multi-image Vision-Language Models",
+        "O-TPT: Orthogonality Constraints for Calibrating Test-time Prompt Tuning in Vision-Language Models",
+        "Perception Tokens Enhance Visual Reasoning in Multimodal Language Models",
+        "VELOCITI: Benchmarking Video-Language Compositional Reasoning with Strict Entailment",
+    },
+    ("CVPR", 2026): {
+        "Beyond Perceptual Shortcuts: Causal-Inspired Debiasing Optimization for Generalizable Video Reasoning in Lightweight MLLMs",
+        "CC-VQA: Conflict- and Correlation-Aware Method for Mitigating Knowledge Conflict in Knowledge-Based Visual Question Answering",
+        "CodeV: Code with Images for Faithful Visual Reasoning via Tool-Aware Policy Optimization",
+        "Do VLMs Perceive or Recall? Probing Visual Perception vs. Memory with Classic Visual Illusions",
+        "Dual-Level Confidence based Implicit Self-Refinement for Medical Visual Question Answering",
+        "Linking Perception, Confidence and Accuracy in MLLMs",
+        "PDCR: Perception-Decomposed Confidence Reward for Vision-Language Reasoning",
+        "Proof-of-Perception: Certified Tool-Using Multimodal Reasoning with Compositional Conformal Guarantees",
+        "Revisiting Visual Corruptions in LVLMs: A Shape-Texture Perspective on Model Failures",
+        "Saliency-R1: Enforcing Interpretable and Faithful Vision-language Reasoning via Saliency-map Alignment Reward",
+        "Same or Not? Enhancing Visual Perception in Vision-Language Models",
+        "Uncertainty-Aware Knowledge Distillation for Multimodal Large Language Models",
+    },
+    ("ICLR", 2024): {
+        "C-TPT: Calibrated Test-Time Prompt Tuning for Vision-Language Models via Text Feature Dispersion",
+        "Faithful Vision-Language Interpretation via Concept Bottleneck Models",
+        "Grounding Multimodal Large Language Models to the World",
+        "RAPPER: Reinforced Rationale-Prompted Paradigm for Natural Language Explanation in Visual Question Answering",
+    },
+    ("ICLR", 2025): {
+        "Dysca: A Dynamic and Scalable Benchmark for Evaluating Perception Ability of LVLMs",
+        "Have the VLMs Lost Confidence? A Study of Sycophancy in VLMs",
+        "Mind the GAP: Glimpse-based Active Perception improves generalization and sample efficiency of visual reasoning",
+        "MLLMs Know Where to Look: Training-free Perception of Small Visual Details with Multimodal LLMs",
+        "Natural Language Inference Improves Compositionality in Vision-Language Models",
+        "See What You Are Told: Visual Attention Sink in Large Multimodal Models",
+        "Two Effects, One Trigger: On the Modality Gap, Object Bias, and Information Imbalance in Contrastive Vision-Language Models",
+    },
+    ("ICLR", 2026): {
+        "The Unseen Bias: How Norm Discrepancy in Pre-Norm MLLMs Leads to Visual Information Loss",
+        "Let's Think in Two Steps: Mitigating Agreement Bias in MLLMs with Self-Grounded Verification",
+        "Math Blind: Failures in Diagram Understanding Undermine Reasoning in MLLMs",
+        "Perception-Aware Policy Optimization for Multimodal Reasoning",
+        "RegionReasoner: Region-Grounded Multi-Round Visual Reasoning",
+        "Revisiting Confidence Calibration for Misclassification Detection in VLMs",
+        "SpaCE-10: A Comprehensive Benchmark for Multimodal Large Language Models in Compositional Spatial Intelligence",
+        "SpatialViz-Bench: A Cognitively-Grounded Benchmark for Diagnosing Spatial Visualization in MLLMs",
+        "Teaching VLMs to Admit Uncertainty in OCR from Lossy Visual Inputs",
+        "Understanding Language Prior of LVLMs by Contrasting Chain-of-Embedding",
+        "ViPER: Empowering the Self-Evolution of Visual Perception Abilities in Vision-Language Models",
+        "VisuRiddles: Fine-grained Perception is a Primary Bottleneck for Multimodal Large Language Models in Abstract Visual Reasoning",
+        "Why Keep Your Doubts to Yourself? Trading Visual Uncertainties among Vision-Language Models",
+    },
+    ("NeurIPS", 2023): {
+        "COCO-Counterfactuals: Automatically Constructed Counterfactual Examples for Image-Text Pairs",
+        "Interactive Visual Reasoning under Uncertainty",
+        "SugarCrepe: Fixing Hackable Benchmarks for Vision-Language Compositionality",
+    },
+    ("NeurIPS", 2024): {
+        "BiVLC: Extending Vision-Language Compositionality Evaluation with Text-to-Image Retrieval",
+        "ConMe: Rethinking Evaluation of Compositional Reasoning for Modern VLMs",
+        "MultiTrust: A Comprehensive Benchmark Towards Trustworthy Multimodal Large Language Models",
+        "SpatialRGPT: Grounded Spatial Reasoning in Vision-Language Models",
+        "Towards Calibrated Robust Fine-Tuning of Vision-Language Models",
+        "WildVision: Evaluating Vision-Language Models in the Wild with Human Preferences",
+    },
+    ("NeurIPS", 2025): {
+        "ColorBench: Can VLMs See and Understand the Colorful World? A Comprehensive Benchmark for Color Perception, Reasoning, and Robustness",
+        "CURV: Coherent Uncertainty-Aware Reasoning in Vision-Language Models for X-Ray Report Generation",
+        "Dual-Stage Value-Guided Inference with Margin-Based Reward Adjustment for Fast and Faithful VLM Captioning",
+        "Grounded Reinforcement Learning for Visual Reasoning",
+        "MMPerspective: Do MLLMs Understand Perspective? A Comprehensive Benchmark for Perspective Perception, Reasoning, and Robustness",
+        "Point-RFT: Improving Multimodal Reasoning with Visually Grounded Reinforcement Finetuning",
+        "Struct2D: A Perception-Guided Framework for Spatial Reasoning in MLLMs",
+        "Understanding and Rectifying Safety Perception Distortion in VLMs",
+        "Unveiling the Compositional Ability Gap in Vision-Language Reasoning Model",
+        "ViCrit: A Verifiable Reinforcement Learning Proxy Task for Visual Perception in VLMs",
+    },
+}
+
+
 EXCLUDE = (
     "3d generation", "3d content generation", "image restoration", "deepfake",
     "text-to-image synthesis", "hallucination-inducing image generation",
     "controlled visual hallucination via thalamus", "sign language translation",
     "visual scene hallucination",
+    "hallucinating latent positives", "scene graph hallucination diffusion",
+    "generative restoration models", "hallucination-aware diffusion priors",
+    "hallugen: synthesizing", "dehallu3d", "audio hallucinations in large audio-language",
+    "leveraging hallucinations to reduce manual prompt dependency",
 )
 
 
@@ -455,6 +589,24 @@ def main() -> None:
             scope = "Related" if title in RELATED_ICML_BY_YEAR[2026] else scope_for(title)
             if scope:
                 add(rows, seen, title, "https://icml.cc" + href, "ICML 2026", 2026, scope)
+
+    # Full-detail audit for CVPR, ICLR, and NeurIPS.  The complete proceedings
+    # indexes are title-only; the companion cache retrieves every plausible
+    # LVLM/VLM paper's official abstract so generic method names are not missed.
+    abstract_cache = Path("/private/tmp/mllm-official-abstracts.json")
+    if abstract_cache.exists():
+        for record in json.loads(abstract_cache.read_text()):
+            title = record["title"]
+            key = (record["venue"], int(record["year"]))
+            if title in RELATED_OFFICIAL_BY_VENUE_YEAR.get(key, set()):
+                scope = "Related"
+            else:
+                scope = scope_for_detail_page(title, record.get("abstract", ""))
+            if scope:
+                add(
+                    rows, seen, title, record["url"],
+                    f"{record['venue']} {record['year']}", int(record["year"]), scope,
+                )
 
     # ICLR and NeurIPS official proceedings indexes.
     for path in sorted(Path("/private/tmp").glob("iclr20*.html")) + sorted(Path("/private/tmp").glob("neurips20*.html")):
